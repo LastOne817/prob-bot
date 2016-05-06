@@ -2,8 +2,8 @@
 
 from connector.ircmessage import IRCMessage
 from queue import Queue
-
-
+import hashlib
+from datetime import date, datetime
 
 
 class Bot():
@@ -38,8 +38,18 @@ class Bot():
                     pass
 
                 elif message.msgType == 'PRIVMSG':
-                    pass
-
+                    if message.msg.find('!확률 ') == 0:
+                        content = message.msg[len('!확률 '):]
+                        print(content)
+                        if content == '':
+                            continue
+                        m = hashlib.md5()
+                        m.update(content.encode())
+                        m.update(datetime.now().strftime("%Y%m%d").encode())
+                        print(m.hexdigest())
+                        prob = int(m.hexdigest(), 16) % 10000
+                        print(prob)
+                        self.irc.sendmsg(message.channel, content + ' = ' + str(prob / 100.0) + '%')
 
 if __name__ == '__main__':
     bot = Bot()
